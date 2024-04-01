@@ -1,8 +1,11 @@
 from Model import Model
 from StageGames import BeautyContestGame
 from Agent import RandomAgent, CaseBasedAgent
+from Collect_Runs import collect_runs
+
 
 steps = 3
+runs = 3
 agent_count = 5
 game_vars = {'stage_game': BeautyContestGame, 'game_params': {'target_scalar': .5, 'prize': 20, 'max_choice':100}}
 #agent_vars = {'agent_type': RandomAgent, 'agent_params': {}}
@@ -11,6 +14,7 @@ agent_vars = {'agent_type': CaseBasedAgent, 'agent_params': {'aspiration': 2, 'a
                                                                                    'target_lag':{'weight':1, 'missing_sim':0}}
                                                              }
                                                              }
+model_args = {'agent_count':agent_count, 'game_vars':game_vars, 'agent_vars': agent_vars}
 
-test_model = Model(agent_count = agent_count, agent_vars = agent_vars, game_vars = game_vars, verbose = True)
-test_model.run_model(step_count = steps)
+
+results =  collect_runs(Model, runs = runs, steps = steps, model_args = model_args)

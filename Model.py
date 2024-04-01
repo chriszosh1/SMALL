@@ -48,3 +48,8 @@ class Model:
         #6. Bookkeeping for next iteration:
         self.stage_game.bookkeeping()                        
         self.period += 1
+
+    def run_model(self, step_count):
+        '''Model steps steps number of times.'''
+        for s in range(step_count):
+            self.step()
