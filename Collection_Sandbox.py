@@ -14,7 +14,7 @@ agent_vars = {'agent_type': CaseBasedAgent, 'agent_params': {'aspiration': 2, 'a
                                                                                    'target_lag':{'weight':1, 'missing_sim':0}}
                                                              }
                                                              }
-output_vars = {'model_level_output': True, 'tag': ''}
+output_vars = {'model_level_output': True, 'file_tag': 'collected_model_output'}
 model_args = {'agent_count':agent_count, 'game_vars':game_vars, 'agent_vars': agent_vars, 'output_vars': output_vars}
 
 

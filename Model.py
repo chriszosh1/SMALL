@@ -9,7 +9,7 @@ class Model:
                  ):
         #Model variables:
         self.period = 0
-        self.run = 0
+        self.run = run
         self.agent_count = agent_count
         self.verbose = verbose
         #Setting up our stage game:
@@ -22,10 +22,10 @@ class Model:
         self.output_vars = output_vars
         if self.output_vars.get('model_level_output', False):
             if self.run == 0:
-                self.file = open(f'{self.output_vars.get("tag", "")}_data.txt','w')
+                self.file = open(f'{self.output_vars.get("file_tag", "")}_data.txt','w')
                 self.file.write('run,period,agent_id,choice,round_payoff,cumulative_payoff\n')
             else:
-                self.file = open(f'{self.output_vars.get("tag", "")}_data.txt','a')
+                self.file = open(f'{self.output_vars.get("file_tag", "")}_data.txt','a')
 
     def collect_actions(self, stated_problem):
         '''Asks the agents to make their choices and returns them.'''
