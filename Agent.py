@@ -8,11 +8,18 @@ class _Agent:
     '''Agent Baseclass'''
     def __init__(self, id):
         self.id = id
+        self.round_payoff = 0
+        self.cumulative_payoff = 0
+    
+    def _update_benefit(self, payoff):
+        '''Updates basic payoff variables'''
+        self.round_payoff = payoff
+        self.cumulative_payoff += payoff
 
 class RandomAgent(_Agent):      #agent_params takes the following form.. {}
     '''Agent Baseclass'''
     def __init__(self, id):
-        self.id = id
+        super().__init__(id)
 
     def choose(self, action_set, stated_problem):
         '''Given actions available and state info, returns choice from action set.'''
@@ -20,12 +27,12 @@ class RandomAgent(_Agent):      #agent_params takes the following form.. {}
 
     def collect_payoff(self, payoff):
         '''Agent take their payoff and update their choice performance forecasts.'''
-        pass
+        self._update_benefit(payoff)
 
 class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspiration': _, 'action_bandwidth':_, sim_weight_action:_,'state_space_params':{'var1':{'weight':_, 'missing':_}, 'var1':{'weight':_, 'missing':_}, ...}
     '''Agent case based reasoning class with bandwidth action sim.'''
     def __init__(self, id, aspiration, sim_weight_action, action_bandwidth, state_space_params):
-        self.id = id
+        super().__init__(id)
         self.aspiration = aspiration
         self.action_bandwidth = action_bandwidth
         self.sim_weight_action = sim_weight_action
@@ -77,7 +84,9 @@ class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspir
         return period_choice
 
     def collect_payoff(self, payoff):
-        '''Agent take their payoff and update their choice performance forecasts.'''
+        '''Agent take their payoff and update their choice performance forecasts.'''      
+        #Updates basic payoff variables
+        self._update_benefit(payoff)
         #Stores experience to memory
         self.memory.append({'circumstance': copy(self.period_stated_problem), 'action': self.period_choice, 'result': payoff})
         if self.id == 0:

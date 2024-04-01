@@ -11,6 +11,8 @@ agent_vars = {'agent_type': CaseBasedAgent, 'agent_params': {'aspiration': 2, 'a
                                                                                    'target_lag':{'weight':1, 'missing_sim':0}}
                                                              }
                                                              }
+output_vars = {'model_level_output': True, 'tag': 'test'}
 
-test_model = Model(agent_count = agent_count, agent_vars = agent_vars, game_vars = game_vars, verbose = True)
+test_model = Model(agent_count = agent_count, agent_vars = agent_vars,
+                   game_vars = game_vars, output_vars = output_vars, verbose = False)
 test_model.run_model(step_count = steps)

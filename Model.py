@@ -3,9 +3,13 @@ class Model:
     def __init__(self, agent_count,
                  agent_vars,          #NOTE: agent_vars passes a dict of shape {'agent_type': class, agent_params: {}}
                  game_vars,           #NOTE: game_vars passes a dict of shape {'stage_game': class, game_params: {}}
-                 verbose = False):
+                 output_vars,         #NOTE: output_vars passes a dict of shape {'model_level_output': bool, 'tag': str}
+                 run = 0,             #For output storage purposes
+                 verbose = False,
+                 ):
         #Model variables:
         self.period = 0
+        self.run = 0
         self.agent_count = agent_count
         self.verbose = verbose
         #Setting up our stage game:
@@ -14,6 +18,14 @@ class Model:
         #Making our agents:
         self.agent_params = agent_vars.get('agent_params')
         self.agents = {i : agent_vars.get('agent_type')(id = i, **self.agent_params) for i in range(agent_count)}
+        #Prepping storing our model output:
+        self.output_vars = output_vars
+        if self.output_vars.get('model_level_output', False):
+            if self.run == 0:
+                self.file = open(f'{self.output_vars.get("tag", "")}_data.txt','w')
+                self.file.write('run,period,agent_id,choice,round_payoff,cumulative_payoff\n')
+            else:
+                self.file = open(f'{self.output_vars.get("tag", "")}_data.txt','a')
 
     def collect_actions(self, stated_problem):
         '''Asks the agents to make their choices and returns them.'''
@@ -27,6 +39,11 @@ class Model:
         for aid, a in self.agents.items():
             a.collect_payoff(payoffs.get(aid))
 
+    def store_output(self):
+        '''Writes output to a text file.'''
+        for aid, a in self.agents.items():
+            self.file.write(f'{self.run},{self.period},{aid},{a.period_choice},{a.round_payoff},{a.cumulative_payoff}\n')
+
     def step(self):
         '''Asks the agents to play one iteration of the stage game.'''
         if self.verbose:
@@ -39,7 +56,9 @@ class Model:
         payoffs = self.stage_game.tabulate_game(period_choices)
         #4. Give agents their payoffs:
         self.distribute_payoffs(payoffs)
-        #5. Printing output:
+        #5. Printing/Storing output:
+        if self.output_vars.get('model_level_output', False):
+            self.store_output()
         if self.verbose:
             print(f'stated_problem: {stated_problem}')
             print(f'period_choices: {period_choices}')

@@ -14,7 +14,8 @@ agent_vars = {'agent_type': CaseBasedAgent, 'agent_params': {'aspiration': 2, 'a
                                                                                    'target_lag':{'weight':1, 'missing_sim':0}}
                                                              }
                                                              }
-model_args = {'agent_count':agent_count, 'game_vars':game_vars, 'agent_vars': agent_vars}
+output_vars = {'model_level_output': True, 'tag': ''}
+model_args = {'agent_count':agent_count, 'game_vars':game_vars, 'agent_vars': agent_vars, 'output_vars': output_vars}
 
 
 results =  collect_runs(Model, runs = runs, steps = steps, model_args = model_args)
