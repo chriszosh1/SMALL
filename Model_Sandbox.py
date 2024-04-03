@@ -1,6 +1,6 @@
 from Model import Model
 from StageGames import BeautyContestGame
-from Agent import RandomAgent, CaseBasedAgent
+from Agent import RandomAgent, CaseBasedAgent, SimpleReinforcementLearning_ER95
 
 steps = 3
 agent_count = 5

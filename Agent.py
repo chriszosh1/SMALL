@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, choices
 from numpy import exp
 from math import sqrt
 from copy import copy
@@ -16,6 +16,7 @@ class _Agent:
         self.round_payoff = payoff
         self.cumulative_payoff += payoff
 
+
 class RandomAgent(_Agent):      #agent_params takes the following form.. {}
     '''Agent chooses from available actions uniform randomly.'''
     def __init__(self, id):
@@ -29,9 +30,44 @@ class RandomAgent(_Agent):      #agent_params takes the following form.. {}
         '''Agent take their payoff and update their choice performance forecasts.'''
         self._update_benefit(payoff)
 
-#class ReinforcementLearning_ER95(_Agent):
-#    '''Agent simple reinforcement learning class defined in ErevRoth95.'''
-    
+
+class SimpleReinforcementLearning_ER95(_Agent):
+    '''Agent class learns through reinforcement on actions, ignoring state, as seen in Erev&Roth95.'''
+    def __init__(self, id, prior_strengths, reinforcement_strength):
+        super().__init__(id)
+        self.R = reinforcement_strength
+        self.S = prior_strengths    #NOTE: Can give int or float for uniform priors, or give dict of shape {act1:float, act2:float...}
+        self.action_attractions = {}
+
+    def choose(self, action_set, stated_problem):
+        '''Given actions available and state info, returns choice from action set.'''
+        #1. Create attraction vector if doesn't exist yet:
+        if not self.action_attractions:
+            if isinstance(self.S, int) or isinstance(self.S, float):
+                self.action_attractions = {act:self.S for act in action_set}
+            elif isinstance(self.S, dict):
+                self.action_attractions = {act:self.S[act] for act in action_set}
+        #2. Choose by drawing action randomly, proportional to attractions:
+        attractions = list(self.action_attractions.values())
+        total = sum(attractions)
+        weights = [attract / total for attract in attractions]
+        period_choice = choices(action_set, weights=weights, k=1)[0]
+        #3. Save and return choice:
+        self.period_stated_problem = stated_problem
+        self.period_choice = period_choice
+        return period_choice
+
+    def collect_payoff(self, payoff):
+        '''Agent take their payoff and update their choice performance forecasts.'''
+        #Updates basic payoff variables
+        self._update_benefit(payoff)
+        #Updates attractions for next round
+        for act, attract in self.action_attractions.items():
+            if act == self.period_choice:
+                self.action_attractions[act] = payoff + (1-self.R) * attract
+            else:
+                self.action_attractions[act] = (1-self.R) * attract
+
 
 class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspiration': _, 'action_bandwidth':_, sim_weight_action:_,'state_space_params':{'var1':{'weight':_, 'missing':_}, 'var1':{'weight':_, 'missing':_}, ...}
     '''Agent case based reasoning class with bandwidth action sim.'''
@@ -44,12 +80,12 @@ class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspir
         self.memory = []        #a list of cases (dictionaries), of the following form.. [{'circumstance': {}, 'action':_, 'result':_}, ...]
         self.action_attractions = {}
 
-    def reset_attractions(self, action_set):
+    def _reset_attractions(self, action_set):
         '''Establishes and resets attractions for new calcs each period.'''
         for a in action_set:
             self.action_attractions[a] = 0
 
-    def update_attractions(self, case, action_set, stated_problem):
+    def _update_attractions(self, case, action_set, stated_problem):
         '''Returns vector of action_attractions case will contribute.'''
         #1. establish range of actions which whose estimates will be affected by this experience (case):
         min_affected = max(case.get('action') - self.action_bandwidth, min(action_set))
@@ -75,10 +111,10 @@ class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspir
     def choose(self, action_set, stated_problem):
         '''Given actions available and state info, returns choice from action set.'''
         #1. Reset attractions to prepare for new calcs:
-        self.reset_attractions(action_set)
+        self._reset_attractions(action_set)
         #2. Update action estimates by processing each case in memory:
         for case in self.memory:
-            self.update_attractions(case, action_set, stated_problem)
+            self._update_attractions(case, action_set, stated_problem)
         #3. Make choice:
         max_cbu = max(self.action_attractions.values())
         period_choice = choice([act for act, cbu in self.action_attractions.items() if cbu == max_cbu])

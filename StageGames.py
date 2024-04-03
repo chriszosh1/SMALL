@@ -1,5 +1,6 @@
 from copy import copy
 
+
 class _StageGame:
     '''Base class for games.'''
     def __init__(self, groupsize = None, pairings = None):
