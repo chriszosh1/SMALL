@@ -5,7 +5,7 @@ from copy import copy
 
 
 class _Agent:
-    '''Agent Baseclass'''
+    '''Agent base class'''
     def __init__(self, id):
         self.id = id
         self.round_payoff = 0
@@ -17,7 +17,7 @@ class _Agent:
         self.cumulative_payoff += payoff
 
 class RandomAgent(_Agent):      #agent_params takes the following form.. {}
-    '''Agent Baseclass'''
+    '''Agent chooses from available actions uniform randomly.'''
     def __init__(self, id):
         super().__init__(id)
 
@@ -28,6 +28,10 @@ class RandomAgent(_Agent):      #agent_params takes the following form.. {}
     def collect_payoff(self, payoff):
         '''Agent take their payoff and update their choice performance forecasts.'''
         self._update_benefit(payoff)
+
+#class ReinforcementLearning_ER95(_Agent):
+#    '''Agent simple reinforcement learning class defined in ErevRoth95.'''
+    
 
 class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspiration': _, 'action_bandwidth':_, sim_weight_action:_,'state_space_params':{'var1':{'weight':_, 'missing':_}, 'var1':{'weight':_, 'missing':_}, ...}
     '''Agent case based reasoning class with bandwidth action sim.'''
