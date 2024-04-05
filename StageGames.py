@@ -3,19 +3,18 @@ from copy import copy
 
 class _StageGame:
     '''Base class for games.'''
-    def __init__(self, groupsize = None, pairings = None):
+    def __init__(self):
         self.action_set = None
-        self.groupsize = groupsize
-        self.pairings = pairings
 
-    def return_action_set(self):
+    def return_action_set(self) -> list:
         '''Returns action set.'''
         return self.action_set      #NOTE: This is supported only for numerical (integer) actions right now in CBR, due to bandwidth def.
 
+
 class BeautyContestGame(_StageGame):
     '''An implementation of the beauty contest game (Keynes 1936 / Alain Ledoux 1981).'''
-    def __init__(self, target_scalar, prize, max_choice, groupsize = None, pairings = None):
-        super().__init__(groupsize, pairings)
+    def __init__(self, target_scalar: float, prize: float, max_choice: int):
+        super().__init__()
         self.action_set = [c for c in range(max_choice+1)]
         self.target_scalar = target_scalar
         self.prize = prize
@@ -23,11 +22,11 @@ class BeautyContestGame(_StageGame):
         self.period_target = None
         self.target_lag = None
 
-    def return_state_info(self, t):
+    def return_state_info(self, t: int) -> dict:
         '''Returns state of the world to agents: period and last period's target.'''
         return {'period': t, 'target_lag': self.target_lag}
 
-    def tabulate_game(self, period_choices):
+    def tabulate_game(self, period_choices: dict) -> dict:
         '''Calculates the agent payoffs and game state using agent choices, then return them.'''
         #1. Calculate the target value:
         self.period_target = sum(period_choices.values()) * self.target_scalar / len(period_choices)
@@ -51,9 +50,10 @@ class BeautyContestGame(_StageGame):
                 payoffs[aid] = 0
         return payoffs
     
-    def bookkeeping(self):
+    def bookkeeping(self) -> None:
         '''Gets ready for next period.'''
         self.target_lag = self.period_target
+
 
 class Symmetric2x2(_StageGame):
     '''A general 2x2 game implementation, which looks as follows:\n
@@ -65,19 +65,19 @@ class Symmetric2x2(_StageGame):
          C = payoff_table[1][0],\n
          D = payoff_table[0][1]\n
     '''
-    def __init__(self, payoff_table, pairings = None, groupsize = None):
-        super().__init__(groupsize, pairings)
+    def __init__(self, payoff_table: dict):
+        super().__init__()
         self.action_set = [0,1]
         self.payoff_table = payoff_table    #NOTE: This is a dict of the form {0:{0:float, 1:float}, 1:{0:float, 1:float}}
         #Accounting vars
         self.period_choice_freq = None
         self.choice_freq_lag = None
 
-    def return_state_info(self, t):
+    def return_state_info(self, t: int) -> dict:
         '''Returns state of the world to agents: period and last period's frequency of choosing each action.'''
         return {'period': t, 'coop_rate_lag': self.choice_freq_lag}
 
-    def tabulate_game(self, period_choices):
+    def tabulate_game(self, period_choices: dict) -> dict:
         '''Calculates the agent payoffs and game state using agent choices, then return them.'''
         #1. Getting frequencies of each action:
         freq_0 = sum(1 for act in period_choices.values() if act == 0)
@@ -99,6 +99,6 @@ class Symmetric2x2(_StageGame):
                 print('ERROR: Invalid agent action!')
         return payoffs
     
-    def bookkeeping(self):
+    def bookkeeping(self) -> None:
         '''Gets ready for next period.'''
         self.choice_freq_lag = copy(self.period_choice_freq)

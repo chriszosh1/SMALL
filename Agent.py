@@ -6,12 +6,12 @@ from copy import copy
 
 class _Agent:
     '''Agent base class'''
-    def __init__(self, id):
+    def __init__(self, id: int):
         self.id = id
         self.round_payoff = 0
         self.cumulative_payoff = 0
     
-    def _update_benefit(self, payoff):
+    def _update_benefit(self, payoff: float) -> None:
         '''Updates basic payoff variables'''
         self.round_payoff = payoff
         self.cumulative_payoff += payoff
@@ -19,27 +19,27 @@ class _Agent:
 
 class RandomAgent(_Agent):      #agent_params takes the following form.. {}
     '''Agent chooses from available actions uniform randomly.'''
-    def __init__(self, id):
+    def __init__(self, id: int):
         super().__init__(id)
 
-    def choose(self, action_set, stated_problem):
+    def choose(self, action_set, stated_problem) -> int:
         '''Given actions available and state info, returns choice from action set.'''
         return choice(action_set)
 
-    def collect_payoff(self, payoff):
+    def collect_payoff(self, payoff: float) -> None:
         '''Agent take their payoff and update their choice performance forecasts.'''
         self._update_benefit(payoff)
 
 
 class SimpleReinforcementLearning_ER95(_Agent):
     '''Agent class learns through reinforcement on actions, ignoring state, as seen in Erev&Roth95.'''
-    def __init__(self, id, prior_strengths, reinforcement_strength):
+    def __init__(self, id: int, prior_strengths: float | dict, reinforcement_strength: float):
         super().__init__(id)
         self.R = reinforcement_strength
-        self.S = prior_strengths    #NOTE: Can give int or float for uniform priors, or give dict of shape {act1:float, act2:float...}
+        self.S = prior_strengths    #NOTE: Can give float for uniform priors, or give dict of shape {act1:float, act2:float...}
         self.action_attractions = {}
 
-    def choose(self, action_set, stated_problem):
+    def choose(self, action_set: list, stated_problem: dict) -> int:
         '''Given actions available and state info, returns choice from action set.'''
         #1. Create attraction vector if doesn't exist yet:
         if not self.action_attractions:
@@ -57,7 +57,7 @@ class SimpleReinforcementLearning_ER95(_Agent):
         self.period_choice = period_choice
         return period_choice
 
-    def collect_payoff(self, payoff):
+    def collect_payoff(self, payoff: float) -> None:
         '''Agent take their payoff and update their choice performance forecasts.'''
         #Updates basic payoff variables
         self._update_benefit(payoff)
@@ -71,7 +71,7 @@ class SimpleReinforcementLearning_ER95(_Agent):
 
 class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspiration': _, 'action_bandwidth':_, sim_weight_action:_,'state_space_params':{'var1':{'weight':_, 'missing':_}, 'var1':{'weight':_, 'missing':_}, ...}
     '''Agent case based reasoning class with bandwidth action sim.'''
-    def __init__(self, id, aspiration, sim_weight_action, action_bandwidth, state_space_params):
+    def __init__(self, id: int, aspiration: float, sim_weight_action: float, action_bandwidth: int, state_space_params: dict):
         super().__init__(id)
         self.aspiration = aspiration
         self.action_bandwidth = action_bandwidth
@@ -80,12 +80,12 @@ class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspir
         self.memory = []        #a list of cases (dictionaries), of the following form.. [{'circumstance': {}, 'action':_, 'result':_}, ...]
         self.action_attractions = {}
 
-    def _reset_attractions(self, action_set):
+    def _reset_attractions(self, action_set: list) -> None:
         '''Establishes and resets attractions for new calcs each period.'''
         for a in action_set:
             self.action_attractions[a] = 0
 
-    def _update_attractions(self, case, action_set, stated_problem):
+    def _update_attractions(self, case: dict, action_set: list, stated_problem: dict) -> None:
         '''Returns vector of action_attractions case will contribute.'''
         #1. establish range of actions which whose estimates will be affected by this experience (case):
         min_affected = max(case.get('action') - self.action_bandwidth, min(action_set))
@@ -108,7 +108,7 @@ class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspir
                 #4. Calculate CBU for that action and add it into our action attractions
                 self.action_attractions[act] += sim_score*(case.get('result') - self.aspiration)
 
-    def choose(self, action_set, stated_problem):
+    def choose(self, action_set: list, stated_problem: dict) -> int:
         '''Given actions available and state info, returns choice from action set.'''
         #1. Reset attractions to prepare for new calcs:
         self._reset_attractions(action_set)
@@ -123,7 +123,7 @@ class CaseBasedAgent(_Agent):   #agent_params takes the following form.. {'aspir
         self.period_choice = period_choice
         return period_choice
 
-    def collect_payoff(self, payoff):
+    def collect_payoff(self, payoff: float) -> None:
         '''Agent take their payoff and update their choice performance forecasts.'''      
         #Updates basic payoff variables
         self._update_benefit(payoff)

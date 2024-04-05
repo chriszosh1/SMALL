@@ -1,6 +1,7 @@
 from enum import Enum
 
 class Pairings(Enum):
-    PLAY_ALL = 0
-    SHUFFLE_IN_GROUP = 1
-    PREDETERMINED_PAIRINGS_IN_GROUP = 2
+    N_PLAYER = 0
+    RANDOM = 1
+    CUSTOM_FIXED = 2
+    CUSTOM_BY_ROUND = 3
