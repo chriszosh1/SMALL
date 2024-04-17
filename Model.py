@@ -2,6 +2,7 @@ from Enums import Pairings
 from random import shuffle
 from copy import copy
 
+
 class Model:
     '''A model to facilitate agents playing a repeated stage game.'''
     def __init__(self, agent_count: int,
@@ -39,7 +40,7 @@ class Model:
         if self.output_vars.get('model_level_output', False):
             if self.run == 0:
                 self.file = open(f'{self.output_vars.get("file_tag", "")}_data.txt','w')
-                self.file.write('run,period,agent_id,choice,round_payoff,cumulative_payoff\n')
+                self.file.write('run,period,group_id,agent_id,choice,round_payoff,cumulative_payoff\n')
             else:
                 self.file = open(f'{self.output_vars.get("file_tag", "")}_data.txt','a')
 
@@ -79,11 +80,11 @@ class Model:
         for aid in payoffs.keys():
             self.agents[aid].collect_payoff(payoffs.get(aid), outcome_info)
 
-    def store_output(self, id_list) -> None:
+    def store_output(self, id_list, group_id) -> None:
         '''Writes output to a text file.'''
         for aid in id_list:
             a = self.agents[aid]
-            self.file.write(f'{self.run},{self.period},{aid},{a.period_choice},{a.round_payoff},{a.cumulative_payoff}\n')
+            self.file.write(f'{self.run},{self.period},{group_id},{aid},{a.period_choice},{a.round_payoff},{a.cumulative_payoff}\n')
 
     def step(self):
         '''Asks the agents to play one iteration of the stage game.'''
@@ -93,7 +94,8 @@ class Model:
             print(f'\n---Period {self.period}---')
             print(f'Pairings: {self.period_pairing}')
         #... then for each pairing/group:
-        for game_group_ids in self.period_pairing:
+        for group_id in range(len(self.period_pairing)):
+            game_group_ids = self.period_pairing[group_id]
             #1. Present the problem to the agents:
             stated_problem = self.stage_game.return_state_info(t=self.period)
             #2. Ask agents to make a choice:
@@ -105,7 +107,7 @@ class Model:
             self.distribute_payoffs(payoffs, outcome_info)
             #5. Printing/Storing output:
             if self.output_vars.get('model_level_output', False):
-                self.store_output(game_group_ids)
+                self.store_output(game_group_ids, group_id)
         if self.verbose:
             pc = {aid: a.period_choice for aid, a in self.agents.items()}
             rpo = {aid: a.round_payoff for aid, a in self.agents.items()}

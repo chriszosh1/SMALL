@@ -78,7 +78,7 @@ class Symmetric2x2(_StageGame):
         self.action_set = [0,1]
         self.payoff_table = payoff_table    #NOTE: This is a dict of the form {0:{0:float, 1:float}, 1:{0:float, 1:float}}
         #Accounting vars
-        self.period_choice_freq = None
+        self.period_choice_freq = {0:None, 1:None}
 
     def tabulate_game(self, period_choices: dict) -> dict:
         '''Calculates the agent payoffs and game state using agent choices, then return them.'''
@@ -89,9 +89,9 @@ class Symmetric2x2(_StageGame):
         #2. Calculate average payoff for players choosing either action:
         player_count = len(period_choices)
         if freq_0 > 0:
-            payoff_0 = ((freq_0-1)*self.payoff_table[0][0] + (freq_1)*self.payoff_table[0][1]) / player_count
+            payoff_0 = ((freq_0-1)*self.payoff_table[0][0] + (freq_1)*self.payoff_table[0][1]) / (player_count-1)
         if freq_1 > 0:
-            payoff_1 = ((freq_0)*self.payoff_table[1][0] + (freq_1-1)*self.payoff_table[1][1]) / player_count
+            payoff_1 = ((freq_0)*self.payoff_table[1][0] + (freq_1-1)*self.payoff_table[1][1]) / (player_count-1)
         #3. Awarding players their payoff:
         payoffs = {}
         for aid, act in period_choices.items():
@@ -106,7 +106,7 @@ class Symmetric2x2(_StageGame):
     
     def return_outcome_info(self) -> dict:
         '''Returns info about game result to the agents.'''
-        return {'coop_rate': self.period_choice_freq}
+        return {'coop_rate': self.period_choice_freq[1]}
     
     def bookkeeping(self) -> None:
         '''Gets ready for next period.'''
