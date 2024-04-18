@@ -3,9 +3,10 @@ from StageGames import BeautyContestGame, Symmetric2x2
 from Agent import RandomAgent, CaseBasedAgent, SimpleReinforcementLearning_ER95
 from Enums import Pairings
 
+
 steps = 3
 agent_count = 6
-output_vars = {'model_level_output': True, 'file_tag': 'test'}
+output_vars = {'model_level_output': True, 'file_tag': 'model_sandbox_test_data'}
 
 #-------Stage Game Specification Examples------------:
 #game_vars = {'stage_game': BeautyContestGame, 'game_params': {'target_scalar': .5, 'prize': 20, 'max_choice':100}} #BCG
@@ -31,5 +32,5 @@ cp = [[[0,1],[2,3],[4,5]], [[0,1,2,3,4,5]], [[0,1],[2,3],[4,5]]] #CUSTOM_PER_PER
 
 test_model = Model(agent_count = agent_count, agent_vars = agent_vars,
                    game_vars = game_vars, output_vars = output_vars, verbose = True,
-                   pairing_type=Pairings.CUSTOM_BY_PERIOD, custom_pairing=cp)
+                   pairing_type=Pairings.N_PLAYER, custom_pairing=cp)
 test_model.run_model(step_count = steps)
